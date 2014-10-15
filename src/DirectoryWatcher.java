@@ -89,10 +89,10 @@ public final class DirectoryWatcher {
     }
 
     public interface EventHandler {
-        public Object create(Path parent, Path child);
+        public void create(Path parent, Path child);
 
-        public Object delete(Path parent, Path child);
+        public void delete(Path parent, Path child);
 
-        public Object modify(Path parent, Path child);
+        public void modify(Path parent, Path child);
     }
 }
