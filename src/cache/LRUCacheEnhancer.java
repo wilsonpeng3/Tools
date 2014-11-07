@@ -1,35 +1,58 @@
-/*
- * Copyright (c) 2014. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
- * Morbi non lorem porttitor neque feugiat blandit. Ut vitae ipsum eget quam lacinia accumsan.
- * Etiam sed turpis ac ipsum condimentum fringilla. Maecenas magna.
- * Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
- * Vestibulum commodo. Ut rhoncus gravida arcu.
- */
-
-package rocky.cache;
-
-import rocky.comm.Node;
+package cache;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class LRUCache {
+/**
+ * 1、支持多线程环境
+ * 2、完成了从缓存进行判断的工作
+ */
+public abstract class LRUCacheEnhancer {
+
+    /**
+     * 用于链表
+     */
+    public final class Node {
+        private Object data;
+        private Node nextNode;
+
+        public Node(Object data, Node nextNode) {
+            this.data = data;
+            this.nextNode = nextNode;
+        }
+
+        public Object getData() {
+            return data;
+        }
+
+        public void setData(Object data) {
+            this.data = data;
+        }
+
+        public Node getNextNode() {
+            return nextNode;
+        }
+
+        public void setNextNode(Node nextNode) {
+            this.nextNode = nextNode;
+        }
+    }
 
     private int originalCapacity = 5;
     private int capacity = originalCapacity;
     private Node head = new Node(null, null);  //头节点，它的下一个节点就是最近最久未被使用的
     private Node tail = head;    //初始时，末尾节点也是头节点
-    private ConcurrentHashMap<Object, Object> container = new ConcurrentHashMap<>();  //采用LRU算法对这个map里的实例进行维护
+    private ConcurrentHashMap<Object, Object> cache = new ConcurrentHashMap<Object, Object>();  //采用LRU算法对这个map里的实例进行维护
 
     /**
      * @param capacity 如果小于等于1，默认修改为5
      */
-    public LRUCache(int capacity) {
+    public LRUCacheEnhancer(int capacity) {
         this.originalCapacity = capacity <= 1 ? 5 : capacity;
         this.capacity = originalCapacity;
     }
 
     public synchronized Object get(Object key) {
-        if (container.containsKey(key)) {  //找到了
+        if (cache.containsKey(key)) {  //找到了
             Node preNode = findNode(head, key);
             Node currNode = preNode.getNextNode();
             Node nextNode = currNode.getNextNode();
@@ -40,7 +63,7 @@ public abstract class LRUCache {
                 currNode.setNextNode(null);
                 tail = currNode;
             }
-            return container.get(key);
+            return cache.get(key);
         } else {   //如果没有找到。
             Node newNode = new Node(key, null);
             tail.setNextNode(newNode);
@@ -52,17 +75,17 @@ public abstract class LRUCache {
                 Node firstNode = head.getNextNode();
                 head.setNextNode(firstNode.getNextNode());
                 firstNode.setNextNode(null);
-                container.remove(firstNode.getData());
+                cache.remove(firstNode.getData());
             }
 
-            Object newDriver = getData(key);
-            container.put(key, newDriver);
-            return newDriver;
+            Object data = getData(key);
+            cache.put(key, data);
+            return data;
         }
     }
 
     public synchronized void clear() {
-        container.clear();
+        cache.clear();
         head = new Node(null, null);
         tail = head;
         capacity = originalCapacity;
@@ -92,12 +115,15 @@ public abstract class LRUCache {
     @Override
     public String toString() {
         Node firstNode = this.head.getNextNode();
-        StringBuffer sb = new StringBuffer();
+        StringBuffer keys = new StringBuffer();
+        keys.append("keys=");
+        StringBuffer datas = new StringBuffer();
+        datas.append("datas=");
         while (firstNode != null) {
-            sb.append(firstNode.getData() + "\t");
+            keys.append(firstNode.getData() + "   ");
+            datas.append(cache.get(firstNode.getData()) + "   ");
             firstNode = firstNode.getNextNode();
         }
-        sb.append("\n");
-        return sb.toString();
+        return keys.toString() + datas.toString();
     }
 }
