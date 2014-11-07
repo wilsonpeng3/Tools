@@ -1,3 +1,5 @@
+package misc;
+
 public class JDBCManager {
     private String driverName = "";
     private String connStr = "";

@@ -1,3 +1,5 @@
+package misc;
+
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -12,6 +14,7 @@ public class JarHelper {
             handler.handle(entry);
         }
     }
+
     public interface EntryHandler {
         public void handle(JarEntry entry);
     }

@@ -1,3 +1,5 @@
+package misc;
+
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -7,7 +9,7 @@ import java.io.File;
 
 public class XMLHelper {
     public static Document parse(String fromStr) throws DocumentException {
-         return DocumentHelper.parseText(fromStr);
+        return DocumentHelper.parseText(fromStr);
     }
 
     public static Document parse(File xmlFile) throws DocumentException {
